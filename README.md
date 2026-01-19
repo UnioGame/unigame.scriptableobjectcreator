@@ -2,6 +2,8 @@
 
 ## Overview
 
+![Window](https://i.ibb.co/3y2RnMGF/socreator2.png)
+
 A lightweight UI Toolkit-based editor window for creating ScriptableObject instances
 
 ## Features
@@ -26,4 +28,6 @@ A lightweight UI Toolkit-based editor window for creating ScriptableObject insta
 
 1. Right-click in the Project window
 2. Select **Create New Scriptable Object**
+
+![Menu](https://i.ibb.co/h1dcfY9V/socreator1.png)
 

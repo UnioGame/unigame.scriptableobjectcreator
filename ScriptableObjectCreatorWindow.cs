@@ -63,6 +63,7 @@ namespace UnityToolbarExtender.Editor
         private int lastSelectedInstanceID = -1;
         private bool isCreatingAsset = false;
         private int assetCountToCreate = 1;
+        private string assetName = "";
 
         private void OnEnable()
         {
@@ -166,6 +167,27 @@ namespace UnityToolbarExtender.Editor
             var currentTypeIndex = selectedIndices?.Any() == true ? selectedIndices.First() : -1;
             var currentInstanceID = Selection.activeInstanceID;
 
+            // Always update asset path label since it depends on assetName which might have changed
+            var assetPathLabel = rootVisualElement.Q<Label>("assetPathLabel");
+            if (assetPathLabel != null)
+            {
+                var source = typeListView?.itemsSource as List<Type>;
+                
+                if (currentTypeIndex >= 0 && source != null && currentTypeIndex < source.Count)
+                {
+                    var selectedType = source[currentTypeIndex];
+                    var fileName = string.IsNullOrEmpty(assetName) ? selectedType.Name : assetName;
+                    var previewPath = currentPath + "/" + fileName + ".asset";
+                    var uniquePath = AssetDatabase.GenerateUniqueAssetPath(previewPath);
+                    assetPathLabel.text = $"Asset will be created at: {uniquePath}";
+                }
+                else
+                {
+                    assetPathLabel.text = $"Asset will be created at: {currentPath}/[AssetName].asset";
+                }
+            }
+
+            // Check if path, type, or other state changed to avoid unnecessary redraws
             if (lastSelectedPath == currentPath && lastSelectedTypeIndex == currentTypeIndex && lastSelectedInstanceID == currentInstanceID)
                 return;
 
@@ -178,25 +200,6 @@ namespace UnityToolbarExtender.Editor
             if (rootVisualElement.Q<Label>("folderLabel") is Label folderLabel)
             {
                 folderLabel.text = $"Folder: {currentPath}";
-            }
-
-            // Update asset path preview
-            if (rootVisualElement.Q<Label>("assetPathLabel") is Label assetPathLabel)
-            {
-                var source = typeListView?.itemsSource as List<Type>;
-                
-                if (currentTypeIndex >= 0 && source != null && currentTypeIndex < source.Count)
-                {
-                    var selectedType = source[currentTypeIndex];
-                    var fileName = selectedType.Name;
-                    var previewPath = currentPath + "/" + fileName + ".asset";
-                    var uniquePath = AssetDatabase.GenerateUniqueAssetPath(previewPath);
-                    assetPathLabel.text = $"Asset will be created at: {uniquePath}";
-                }
-                else
-                {
-                    assetPathLabel.text = $"Asset will be created at: {currentPath}/[AssetName].asset";
-                }
             }
         }
 
@@ -506,6 +509,18 @@ namespace UnityToolbarExtender.Editor
             assetPathLabel.style.whiteSpace = WhiteSpace.Normal;
             rightPanel.Add(assetPathLabel);
 
+            // Asset name field
+            var nameField = new TextField("Asset Name");
+            nameField.value = assetName;
+            nameField.style.marginBottom = 10;
+            nameField.RegisterValueChangedCallback(evt =>
+            {
+                assetName = evt.newValue;
+                // Immediately update path labels when asset name changes
+                UpdatePathLabels();
+            });
+            rightPanel.Add(nameField);
+
             // Count field for creating multiple assets
             var countField = new IntegerField("Count");
             countField.value = assetCountToCreate;
@@ -662,7 +677,7 @@ namespace UnityToolbarExtender.Editor
                     return;
                 }
 
-                var fileName = selectedType.Name;
+                var fileName = string.IsNullOrEmpty(assetName) ? selectedType.Name : assetName;
                 var dest = currentTargetFolder + "/" + fileName + ".asset";
                 dest = AssetDatabase.GenerateUniqueAssetPath(dest);
 
