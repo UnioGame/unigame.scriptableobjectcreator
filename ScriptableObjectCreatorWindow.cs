@@ -552,6 +552,9 @@ namespace UnityToolbarExtender.Editor
             rightPanel.Add(scrollView);
 
             root.Add(rightPanel);
+
+            // Set focus to search field by default
+            searchField.Focus();
         }
 
         private void UpdatePreview()
