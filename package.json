@@ -1,6 +1,6 @@
 {
   "name": "com.unigame.scriptableobjectcreator",
-  "version": "2026.0.0",
+  "version": "2026.0.1",
   "displayName": "UniGame ScriptableObject Creator",
   "description": "A lightweight UI Toolkit-based editor window for creating ScriptableObject instances without external dependencies",
   "unity": "2023.2",

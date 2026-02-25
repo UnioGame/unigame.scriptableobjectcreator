@@ -55,7 +55,6 @@ namespace UnityToolbarExtender.Editor
             var window = GetWindow<ScriptableObjectCreatorWindow>("Create Scriptable Object");
             window.targetFolder = path.TrimEnd('/');
             window.minSize = new Vector2(800, 500);
-            Debug.Log($"ScriptableObjectCreator opened. Target folder: {window.targetFolder}");
         }
 
         private string lastSelectedPath = "";
@@ -75,13 +74,11 @@ namespace UnityToolbarExtender.Editor
 
         private void OnDisable()
         {
-            Debug.Log("ScriptableObjectCreatorWindow closed, unsubscribing from events");
             UnsubscribeFromEvents();
         }
 
         private void OnDestroy()
         {
-            Debug.Log("ScriptableObjectCreatorWindow destroyed, cleaning up");
             
             // Ensure events are unsubscribed
             UnsubscribeFromEvents();
@@ -115,8 +112,7 @@ namespace UnityToolbarExtender.Editor
             if (obj != null)
             {
                 var objPath = AssetDatabase.GetAssetPath(obj);
-                Debug.Log($"Selection changed: obj={obj.name}, objPath={objPath}, isFolder={AssetDatabase.IsValidFolder(objPath)}");
-                
+
                 if (!string.IsNullOrEmpty(objPath))
                 {
                     if (AssetDatabase.IsValidFolder(objPath))
@@ -141,7 +137,6 @@ namespace UnityToolbarExtender.Editor
                     if (!string.IsNullOrEmpty(path) && AssetDatabase.IsValidFolder(path))
                     {
                         currentPath = path;
-                        Debug.Log($"Found folder from instanceID: {path}");
                     }
                 }
             }
@@ -156,7 +151,6 @@ namespace UnityToolbarExtender.Editor
                     if (AssetDatabase.IsValidFolder(selectedPath))
                     {
                         currentPath = selectedPath;
-                        Debug.Log($"Found folder from selection: {selectedPath}");
                         break;
                     }
                 }
@@ -191,7 +185,6 @@ namespace UnityToolbarExtender.Editor
             if (lastSelectedPath == currentPath && lastSelectedTypeIndex == currentTypeIndex && lastSelectedInstanceID == currentInstanceID)
                 return;
 
-            Debug.Log($"Updating path labels: {currentPath} (instanceID: {currentInstanceID})");
             lastSelectedPath = currentPath;
             lastSelectedTypeIndex = currentTypeIndex;
             lastSelectedInstanceID = currentInstanceID;
@@ -329,12 +322,10 @@ namespace UnityToolbarExtender.Editor
                 {
                     // Get the selected indices - could be IEnumerable of int or object
                     var selectedList = selection.ToList();
-                    Debug.Log($"Selection event fired. Count: {selectedList.Count}");
                     
                     if (selectedList.Count > 0)
                     {
                         var firstItem = selectedList[0];
-                        Debug.Log($"First item type: {firstItem.GetType().Name}, value: {firstItem}");
                     }
                     
                     if (selectedList.Count == 0)
@@ -348,12 +339,10 @@ namespace UnityToolbarExtender.Editor
                     int index = -1;
                     if (selectedList[0] is int intIndex)
                     {
-                        Debug.Log($"Directly cast to int: {intIndex}");
                         index = intIndex;
                     }
                     else if (int.TryParse(selectedList[0].ToString(), out int parsed))
                     {
-                        Debug.Log($"Parsed to int: {parsed}");
                         index = parsed;
                     }
                     else
@@ -362,14 +351,11 @@ namespace UnityToolbarExtender.Editor
                     }
 
                     var source = typeListView.itemsSource as List<Type>;
-                    Debug.Log($"ItemsSource type: {source?.GetType().Name}, Count: {source?.Count ?? 0}, Index: {index}");
                     
                     if (source != null && index >= 0 && index < source.Count)
                     {
                         selectedType = source[index];
-                        Debug.Log($"✓ Selected type successfully: {selectedType.Name}");
                         UpdatePreview();
-                        Debug.Log($"Selected type: {selectedType.Name}");
                     }
                     else
                     {
@@ -578,7 +564,6 @@ namespace UnityToolbarExtender.Editor
             {
                 try
                 {
-                    Debug.Log($"Creating preview for type: {selectedType.Name}");
                     previewObject = CreateInstance(selectedType);
                     if (previewObject != null)
                     {
@@ -589,9 +574,7 @@ namespace UnityToolbarExtender.Editor
 
                         // Create a new SerializedObject and bind it
                         var serializedObject = new SerializedObject(previewObject);
-                        Debug.Log($"SerializedObject created: {serializedObject != null}");
                         inspectorElement.Bind(serializedObject);
-                        Debug.Log($"Inspector bound successfully");
                     }
                     else
                     {
@@ -638,8 +621,6 @@ namespace UnityToolbarExtender.Editor
                     }
                 }
                 
-                Debug.Log($"Creating asset in folder: {currentTargetFolder}");
-
                 // Double-check selectedType from ListView state
                 var selectedIndices = typeListView.selectedIndices;
                 if (!selectedIndices.Any())
@@ -659,7 +640,6 @@ namespace UnityToolbarExtender.Editor
                 }
 
                 selectedType = currentItemsSource[selectedIndex];
-                Debug.Log($"CreateAsset called. selectedType = {(selectedType != null ? selectedType.Name : "NULL")}");
 
                 if (selectedType == null || selectedType.IsAbstract)
                 {
@@ -708,8 +688,6 @@ namespace UnityToolbarExtender.Editor
                     // Create the asset
                     AssetDatabase.CreateAsset(assetObject, assetPath);
                     lastCreatedAsset = (ScriptableObject)AssetDatabase.LoadAssetAtPath(assetPath, selectedType);
-                    
-                    Debug.Log($"Asset {i + 1} created successfully at: {assetPath}");
                 }
 
                 AssetDatabase.SaveAssets();
@@ -727,7 +705,6 @@ namespace UnityToolbarExtender.Editor
                 if (typeListView.itemsSource is List<Type> source && selectedIndex >= 0 && selectedIndex < source.Count)
                 {
                     typeListView.SetSelection(selectedIndex);
-                    Debug.Log($"Selection restored to index {selectedIndex}");
                 }
             }
             finally
